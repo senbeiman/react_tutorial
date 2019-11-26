@@ -53,7 +53,7 @@ class Game extends React.Component {
         };
     }
 
-    handleClick(i) {
+    handleClick = (i) => {
         const history = this.state.history.slice(0, this.state.stepNumber + 1);
         const current = history[history.length - 1];
         const squares = current.squares.slice();
@@ -78,7 +78,7 @@ class Game extends React.Component {
         });
     }
 
-    handleChange() {
+    handleChange = () => {
         this.setState({historyIsAsc: !this.state.historyIsAsc,});
     }
 
@@ -115,7 +115,7 @@ class Game extends React.Component {
                 <div className="game-board">
                     <Board
                         squares={current.squares}
-                        onClick={(i) => this.handleClick(i)}
+                        onClick={this.handleClick}
                         highlightLines={winnerInfo.lines}
                     />
                 </div>
@@ -124,7 +124,7 @@ class Game extends React.Component {
                         history order: desc
                         <Switch
                         checked={this.state.historyIsAsc}
-                        onChange={() => this.handleChange()}
+                        onChange={this.handleChange}
                         value="check"
                         color="default"/>
                         asc
