@@ -1,139 +1,62 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import Switch from "@material-ui/core/Switch";
+import { connect, Provider } from 'react-redux';
+import { createStore, applyMiddleware } from 'redux';
+import { createLogger } from "redux-logger";
 import './index.css';
 
-function Square(props) {
-    const classNameToAdd = props.highlight ? 'background-yellow' : '';
-    return (
-        <button className={`square ${classNameToAdd}`} onClick={props.onClick} >
-            {props.value}
-        </button>
-    );
-}
+// action creators
+const addHistory = (number) => ({
+    type: 'ADD_HISTORY',
+    number
+    });
+const jumpStep = step => ({
+    type: 'JUMP_STEP',
+    step
+});
+const toggleSort = () => ({
+    type: 'TOGGLE_SORT'
+});
+// reducers
+const game = (
+    state = {
+        history: [null],
+        stepNumber: 0,
+        xIsNext: true,
+        historyIsAsc: true,
+    },
+    action
+) => {
+    switch (action.type) {
+        case 'ADD_HISTORY':
+            const squares = getSquaresFromHistory(state.history, state.stepNumber);
+            if (calculateWinner(squares).winner || squares[action.number]) {
+                return state;
+            }
+            const history = state.history.slice(0, state.stepNumber+1);
+            return {
+                ...state,
+                history: history.concat([action.number]),
+                stepNumber: state.stepNumber + 1,
+                xIsNext: !state.xIsNext,
+            };
+        case 'JUMP_STEP':
+            return {
+                ...state,
+                stepNumber: action.step,
+                xIsNext: (action.step % 2) === 0,
+            };
+        case 'TOGGLE_SORT':
+            return {
+                ...state,
+                historyIsAsc: !state.historyIsAsc
+            };
+        default:
+            return state;
+    }
+};
 
-class Board extends React.Component {
-    renderSquare(i) {
-        return (
-            <Square
-                value={this.props.squares[i]}
-                onClick={() => this.props.onClick(i)}
-                highlight={this.props.highlightLines.indexOf(i) !== -1}
-                key={i}
-            />
-        );
-    }
-    repeatSquareRow(row) {
-        let squares = [];
-        for (let i = 0; i < 3; i++) {
-            squares.push(this.renderSquare(row * 3 + i));
-        }
-        return <div className="board-row" key={row}>{squares}</div>;
-    }
-    render() {
-        let squareRows = [];
-        for (let i = 0; i < 3; i++) {
-            squareRows.push(this.repeatSquareRow(i));
-        }
-        return <div>{squareRows}</div>;
-    }
-}
-
-class Game extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            history: [{
-                squares: Array(9).fill(null),
-                squareNumber: null,
-            }],
-            stepNumber: 0,
-            xIsNext: true,
-            historyIsAsc: true,
-        };
-    }
-
-    handleClick = (i) => {
-        const history = this.state.history.slice(0, this.state.stepNumber + 1);
-        const current = history[history.length - 1];
-        const squares = current.squares.slice();
-        if (calculateWinner(squares).winner || squares[i]) {
-            return;
-        }
-        squares[i] = this.state.xIsNext ? 'X' : 'O';
-        this.setState({
-            history: history.concat([{
-                squares: squares,
-                squareNumber: i,
-            }]),
-            stepNumber: history.length,
-            xIsNext: !this.state.xIsNext,
-        });
-    }
-
-    jumpTo(step) {
-        this.setState({
-            stepNumber: step,
-            xIsNext: (step % 2) === 0,
-        });
-    }
-
-    handleChange = () => {
-        this.setState({historyIsAsc: !this.state.historyIsAsc,});
-    }
-
-    render() {
-        const history = this.state.history;
-        const current = history[this.state.stepNumber];
-        const winnerInfo = calculateWinner(current.squares);
-        const moves = history.map((step, move) => {
-            const desc = move ?
-                'Go to move #' + move :
-                'Go to game start';
-            const col = (step.squareNumber !== null) ? 'col: ' + (step.squareNumber % 3 + 1) : '';
-            const row = (step.squareNumber !== null) ? 'row: ' + (Math.floor(step.squareNumber / 3) + 1) : '';
-            const isBold = (this.state.stepNumber === move) ? 'font-bold' : '';
-            const moveNum = move ? 'move #' + move + '>' : '';
-            return (
-                <li key={move} className={isBold}>
-                    {moveNum} {col} {row}
-                    <button onClick={() => this.jumpTo(move)}>{desc}</button>
-                </li>
-            );
-        });
-        const orderedMoves = this.state.historyIsAsc ? moves : moves.reverse();
-        let status;
-        if (winnerInfo.winner) {
-            status = 'Winner: ' + winnerInfo.winner;
-        } else if (this.state.stepNumber === 9){
-            status = 'Draw';
-        } else {
-            status = 'Next player: ' + (this.state.xIsNext ? 'X' : 'O');
-        }
-        return (
-            <div className="game">
-                <div className="game-board">
-                    <Board
-                        squares={current.squares}
-                        onClick={this.handleClick}
-                        highlightLines={winnerInfo.lines}
-                    />
-                </div>
-                <div className="game-info">
-                    <div>{status}</div>
-                        history order: desc
-                        <Switch
-                        checked={this.state.historyIsAsc}
-                        onChange={this.handleChange}
-                        value="check"
-                        color="default"/>
-                        asc
-                    <ol>{orderedMoves}</ol>
-                </div>
-            </div>
-    );
-    }
-}
 function calculateWinner(squares) {
     const lines = [
         [0, 1, 2],
@@ -153,9 +76,162 @@ function calculateWinner(squares) {
     }
     return {winner: null, lines: []};
 }
-// ========================================
 
+function getSquaresFromHistory(history, stepNumber){
+    const current = history.slice(0, stepNumber + 1);
+    let squares = Array(9).fill(null);
+    current.forEach((number, index) => {
+        squares[number] = (index % 2 === 0) ? 'O' : 'X';
+    });
+    return squares;
+}
+
+
+const Square = ({ onClick, value, highlight }) => {
+    const classNameToAdd = highlight ? 'background-yellow' : '';
+    return (
+        <button className={`square ${classNameToAdd}`} onClick={onClick} >
+            {value}
+        </button>
+    );
+};
+const mapSquareStateToProps = (state, ownProps) => {
+    const squares = getSquaresFromHistory(state.history, state.stepNumber);
+    const winnerInfo = calculateWinner(squares);
+    return {
+        value: squares[ownProps.number],
+        highlight: winnerInfo.lines.indexOf(ownProps.number) !== -1
+    }
+};
+const mapSquareDispatchToProps = (dispatch, ownProps) => {
+    return {
+        onClick: () => {
+            dispatch(addHistory(ownProps.number))
+        }
+    }
+};
+const FilledSquare = connect(
+    mapSquareStateToProps,
+    mapSquareDispatchToProps
+)(Square);
+
+const SquareRow = ({ row }) => {
+    let squareLines = [];
+    for (let i = 0; i < 3; i++) {
+        squareLines.push(
+            <FilledSquare number={row * 3 + i} key={i}/>
+        );
+    }
+    return <div className="board-row" >{squareLines}</div>;
+};
+
+const Board = () => {
+    let squareRows = [];
+    for (let i = 0; i < 3; i++) {
+        squareRows.push(<SquareRow key={i} row={i}/>);
+    }
+    return <div className="game-board">{squareRows}</div>;
+};
+
+const Move = ({ isBold, moveNum, desc, col, row, onClick }) => {
+    return (
+        <li className={isBold}>
+            {moveNum} {col} {row}
+            <button onClick={onClick}>{desc}</button>
+        </li>
+    );
+};
+const mapMoveStateToProps = (state, ownProps) => {
+    return {
+        isBold:(state.stepNumber === ownProps.move) ? 'font-bold' : '',
+        desc : ownProps.move ? 'Go to move #' + ownProps.move : 'Go to game start',
+        moveNum : ownProps.move ? 'move #' + ownProps.move + '>' : '',
+        col:(ownProps.number!== null) ? 'col: ' + (ownProps.number % 3 + 1) : '',
+        row:(ownProps.number!== null) ? 'row: ' + (Math.floor(ownProps.number / 3) + 1) : ''
+    }
+};
+const mapMoveDispatchToProps = (dispatch, ownProps) => {
+    return {
+        onClick: () => {
+            dispatch(jumpStep(ownProps.move))
+        }
+    }
+};
+const CalculatedMove = connect(
+    mapMoveStateToProps,
+    mapMoveDispatchToProps
+)(Move);
+
+let Moves = ({ history, historyIsAsc }) => {
+    const moves = history.map((number, index) => (
+            <CalculatedMove key={index} number={number} move={index}/>
+        )
+    );
+    const orderedMoves = historyIsAsc ? moves : moves.reverse();
+    return <ol>{orderedMoves}</ol>;
+};
+const mapMovesStateToProps = (state) => {
+    return {
+        history: state.history,
+        historyIsAsc: state.historyIsAsc
+    }
+};
+Moves = connect(mapMovesStateToProps)(Moves);
+
+let GameInfo = ({ status, historyIsAsc, handleChange }) => (
+    <div className="game-info">
+        <div>{status}</div>
+        history order: desc
+        <Switch
+            checked={historyIsAsc}
+            onChange={handleChange}
+            value="check"
+            color="default"/>
+        asc
+        <Moves />
+    </div>
+);
+const mapGameInfoStateToProps = (state) => {
+    let status;
+    const squares = getSquaresFromHistory(state.history, state.stepNumber);
+    const winnerInfo = calculateWinner(squares);
+    if (winnerInfo.winner) {
+        status = 'Winner: ' + winnerInfo.winner;
+    } else if (state.stepNumber === 9){
+        status = 'Draw';
+    } else {
+        status = 'Next player: ' + (state.xIsNext ? 'X' : 'O');
+    }
+    return {
+        status,
+        historyIsAsc: state.historyIsAsc
+    }
+};
+const mapGameInfoDispatchToProps = (dispatch) => {
+    return {
+        handleChange: () => {
+            dispatch(toggleSort())
+        }
+    }
+};
+GameInfo = connect(
+    mapGameInfoStateToProps,
+    mapGameInfoDispatchToProps
+)(GameInfo);
+
+const Game = () => {
+    return (
+        <div className="game">
+            <Board />
+            <GameInfo />
+        </div>
+    );
+};
+const loggerMiddleware = createLogger();
+const store = createStore(game, applyMiddleware(loggerMiddleware));
 ReactDOM.render(
-<Game />,
+    <Provider store={store}>
+        <Game />
+    </Provider>,
     document.getElementById('root')
 );

@@ -3,6 +3,11 @@
   <component name="ChangeListManager">
     <list default="true" id="f4aa4e3d-084f-4999-a662-5b7d793ea55f" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/App.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/App.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/App.test.js" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/src/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/index.js" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -64,7 +69,10 @@
       <updated>1574411838964</updated>
       <workItem from="1574411840319" duration="2917000" />
       <workItem from="1574595211741" duration="1431000" />
-      <workItem from="1574650950139" duration="16401000" />
+      <workItem from="1574650950139" duration="17321000" />
+      <workItem from="1575002729458" duration="571000" />
+      <workItem from="1575521573729" duration="2000" />
+      <workItem from="1575594539830" duration="14602000" />
     </task>
     <task id="LOCAL-00001" summary="チュートリアル終了">
       <created>1574671565442</created>
@@ -73,7 +81,14 @@
       <option name="project" value="LOCAL" />
       <updated>1574671565442</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="コールバックのthis対応方法変更">
+      <created>1574743307886</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1574743307886</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -94,6 +109,7 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="チュートリアル終了" />
-    <option name="LAST_COMMIT_MESSAGE" value="チュートリアル終了" />
+    <MESSAGE value="コールバックのthis対応方法変更" />
+    <option name="LAST_COMMIT_MESSAGE" value="コールバックのthis対応方法変更" />
   </component>
 </project>
